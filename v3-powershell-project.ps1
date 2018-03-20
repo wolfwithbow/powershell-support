@@ -61,11 +61,14 @@ foreach($objItem in $colItems) {
 
 Write-Host "# --------------------------------------"
 Write-Host "# Retrieve current device information"
+Write-Host "# Local IP address information"
 Write-Host "# --------------------------------------"
-$colItems = Get-ItemProperty -path HKCU:\SOFTWARE\BigHand\BHRecorder
+$DeviceInfo = Get-ItemProperty -path HKCU:\SOFTWARE\BigHand\BHRecorder
+$IPInfo = Get-WmiObject Win32_NetworkAdapterConfiguration -Namespace "root\CIMV2" |
+ where{$_.IPEnabled -eq "True"}
+$SystemInfo = Get-WmiObject -Class Win32_ComputerSystem
 
-
-foreach($objItem in $colItems) { 
+foreach($objItem in $DeviceInfo) { 
  Write-Host " Recording Device is currently set to:      :" $objItem.RecordingDeviceName
  Write-Host " Playback Device is currently set to:       :" $objItem.PlaybackDeviceName
  Write-Host " Device is installed here:                  :" $objItem.PSPath
@@ -75,15 +78,25 @@ foreach($objItem in $colItems) {
  Write-Host " Current Codec Setting:                     :" $objItem.DefaultLocalCodec
  Write-Host " " 
 }
-
-
-Write-Host "# --------------------------------------"
-Write-Host "# Retrieve current device information"
-Write-Host "# --------------------------------------"
-function GetCurrentDevice {
-    Get-ItemProperty 'HKCU:\SOFTWARE\BigHand\BHRecorder\' | SELECT RecordingDeviceName, PlaybackDeviceName, PSPath, DeviceDriver, RecordingVolume, PlaybackVolume, DefaultLocalCodec
+foreach($objItem in $IPInfo) { 
+ Write-Host "Adapter:" $objItem.Description 
+ Write-Host " DNS Domain:" $objItem.DNSDomain
+ Write-Host " IPv4 Address:" $objItem.IPAddress[0]
+ Write-Host " IPv6 Address:" $objItem.IPAddress[1]
+ Write-Host " " 
 }
-GetCurrentDevice -list
+foreach($objItem in $SystemInfo) { 
+ Write-Host "Domain    :" $objItem.Domain
+ Write-Host "PC        :" $objItem.Manufacturer
+ Write-Host "Model     :" $objItem.Model
+ Write-Host " " 
+}
+foreach($objItem in $SystemInfo) { 
+ Write-Host "Domain    :" $objItem.Domain
+ Write-Host "PC        :" $objItem.Manufacturer
+ Write-Host "Model     :" $objItem.Model
+ Write-Host " " 
+}
 
 
 #####System Info and Windows Updates
