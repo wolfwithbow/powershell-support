@@ -68,6 +68,7 @@ $IPInfo = Get-WmiObject Win32_NetworkAdapterConfiguration -Namespace "root\CIMV2
  where{$_.IPEnabled -eq "True"}
 $SystemInfo = Get-WmiObject -Class Win32_ComputerSystem
 
+
 foreach($objItem in $DeviceInfo) { 
  Write-Host " Recording Device is currently set to:      :" $objItem.RecordingDeviceName
  Write-Host " Playback Device is currently set to:       :" $objItem.PlaybackDeviceName
@@ -97,24 +98,18 @@ foreach($objItem in $SystemInfo) {
  Write-Host "Model     :" $objItem.Model
  Write-Host " " 
 }
-
+function GetUpdateInfo {
+    Get-WmiObject -Class Win32_QuickFixEngineering
+}
+GetUpdateInfo Format-Table –AutoSize
 
 #####System Info and Windows Updates
 #Considerations
 #searchable by required info
 #add - memory info
-function GetSystemInfo {
-    Get-WmiObject -Class Win32_ComputerSystem
-}
-
-GetSystemInfo Format-Table –AutoSize
 
 
-function GetUpdateInfo {
-    Get-WmiObject -Class Win32_QuickFixEngineering
-}
 
-GetUpdateInfo Format-Table –AutoSize
 
 
 #####Device Manager and Power Management Settings
