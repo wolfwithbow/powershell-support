@@ -21,6 +21,8 @@ Check if the required ports on firewall have been enabled
 
 
 #Out-File -filepath C:\Powershell\test.txt
+#FT - Format Table
+#FL - Format List
 #>
 
 Write-Host "# --------------------------------------"
@@ -50,7 +52,8 @@ Write-Host "# --------------------------------------"
     $DeviceInfo = Get-ItemProperty -path HKCU:\SOFTWARE\BigHand\BHRecorder
     $IPInfo = Get-WmiObject Win32_NetworkAdapterConfiguration -Namespace "root\CIMV2" |
         where{$_.IPEnabled -eq "True"}
-    $SystemInfo = Get-WmiObject -Class Win32_ComputerSystem
+    $PCInfo = Get-WmiObject -Class Win32_ComputerSystem
+    $SystemInfo = Get-CimInstance Win32_OperatingSystem
 
 foreach($objItem in $DeviceInfo) { 
     Write-Host " Recording Device is currently set to:      :" $objItem.RecordingDeviceName
@@ -75,6 +78,12 @@ foreach($objItem in $SystemInfo) {
     Write-Host "Model     :" $objItem.Model
     Write-Host " " 
 }
+foreach($objItem in $PCInfo) { 
+    Write-Host "Domain    :" $objItem.Domain
+    Write-Host "PC        :" $objItem.Manufacturer
+    Write-Host "Model     :" $objItem.Model
+    Write-Host " " 
+}
 foreach($objItem in $SystemInfo) { 
     Write-Host "Domain    :" $objItem.Domain
     Write-Host "PC        :" $objItem.Manufacturer
@@ -88,10 +97,19 @@ function GetUpdateInfo {
 GetUpdateInfo Format-Table –AutoSize
 
 
+Write-Host "# --------------------------------------"
+Write-Host "# SYstemInfo"
 
-#####Device Manager and Power Management Settings
+create loop for ProductType:
+Work Station (1)
+Domain Controller (2)
+Server (3)
 
-Get-CimInstance Win32_OperatingSystem | Select-Object  Caption, InstallDate, ServicePackMajorVersion, OSArchitecture, BootDevice,  BuildNumber, CSName | FL
+Write-Host "# --------------------------------------"
+
+Get-CimInstance Win32_OperatingSystem | Select-Object Caption, Manufacturer, ProductType, OSArchitecture, LastBootUpTime, LocalDateTime | FL
+
+
 
 
 Get-ItemProperty -Path HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion
