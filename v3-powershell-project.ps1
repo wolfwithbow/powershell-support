@@ -23,6 +23,16 @@ Check if the required ports on firewall have been enabled
 #Out-File -filepath C:\Powershell\test.txt
 #FT - Format Table
 #FL - Format List
+
+
+
+TO DO
+create loop for ProductType:
+Work Station (1)
+Domain Controller (2)
+Server (3)
+
+edit
 #>
 
 Write-Host "# --------------------------------------"
@@ -85,9 +95,11 @@ foreach($objItem in $PCInfo) {
     Write-Host " " 
 }
 foreach($objItem in $SystemInfo) { 
-    Write-Host "Domain    :" $objItem.Domain
-    Write-Host "PC        :" $objItem.Manufacturer
-    Write-Host "Model     :" $objItem.Model
+    Write-Host "Machine Operating System         :" $objItem.Caption
+    Write-Host "OSArchitecture                   :" $objItem.OSArchitecture
+    Write-Host "WorkStation=1 Server=3           :" $objItem.ProductType
+    Write-Host "Was Last Rebooted                :" $objItem.LastBootUpTime
+    Write-Host "Current date/time on machine     :" $objItem.LocalDateTime
     Write-Host " " 
 }
 
@@ -97,24 +109,11 @@ function GetUpdateInfo {
 GetUpdateInfo Format-Table –AutoSize
 
 
-Write-Host "# --------------------------------------"
-Write-Host "# SYstemInfo"
-
-create loop for ProductType:
-Work Station (1)
-Domain Controller (2)
-Server (3)
-
-Write-Host "# --------------------------------------"
-
-Get-CimInstance Win32_OperatingSystem | Select-Object Caption, Manufacturer, ProductType, OSArchitecture, LastBootUpTime, LocalDateTime | FL
 
 
 
+Get-ChildItem -Path HKCU:\Software -Recurse | Where-Object -FilterScript {($_.SubKeyName -le 1) -and ($_.ValueCount -eq 4) } | Out-File -filepath C:\Powershell\test.txt
 
-Get-ItemProperty -Path HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion
-
-Get-ChildItem -Path HKCU:\Software -Recurse | Where-Object -FilterScript {($_.SubKeyName -le 1) -and ($_.ValueCount -eq 4) }
 
 
 
