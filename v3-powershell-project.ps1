@@ -44,76 +44,52 @@ foreach ($item in $array){
 
 
 Write-Host "# --------------------------------------"
-Write-Host "# Local IP address information"
-Write-Host "# System information, including OS version, machine build"
-Write-Host "# --------------------------------------"
-$colItems = Get-WmiObject Win32_NetworkAdapterConfiguration -Namespace "root\CIMV2" |
- where{$_.IPEnabled -eq "True"}
-
-foreach($objItem in $colItems) { 
- Write-Host "Adapter:" $objItem.Description 
- Write-Host " DNS Domain:" $objItem.DNSDomain
- Write-Host " IPv4 Address:" $objItem.IPAddress[0]
- Write-Host " IPv6 Address:" $objItem.IPAddress[1]
- Write-Host " " 
-}
-
-
-Write-Host "# --------------------------------------"
 Write-Host "# Retrieve current device information"
 Write-Host "# Local IP address information"
 Write-Host "# --------------------------------------"
-$DeviceInfo = Get-ItemProperty -path HKCU:\SOFTWARE\BigHand\BHRecorder
-$IPInfo = Get-WmiObject Win32_NetworkAdapterConfiguration -Namespace "root\CIMV2" |
- where{$_.IPEnabled -eq "True"}
-$SystemInfo = Get-WmiObject -Class Win32_ComputerSystem
-
+    $DeviceInfo = Get-ItemProperty -path HKCU:\SOFTWARE\BigHand\BHRecorder
+    $IPInfo = Get-WmiObject Win32_NetworkAdapterConfiguration -Namespace "root\CIMV2" |
+        where{$_.IPEnabled -eq "True"}
+    $SystemInfo = Get-WmiObject -Class Win32_ComputerSystem
 
 foreach($objItem in $DeviceInfo) { 
- Write-Host " Recording Device is currently set to:      :" $objItem.RecordingDeviceName
- Write-Host " Playback Device is currently set to:       :" $objItem.PlaybackDeviceName
- Write-Host " Device is installed here:                  :" $objItem.PSPath
- Write-Host " Device Driver ID:                          :" $objItem.DeviceDriver
- Write-Host " Recording Volume level:                    :" $objItem.RecordingVolume
- Write-Host " Playback Volume level:                     :" $objItem.PlaybackVolume
- Write-Host " Current Codec Setting:                     :" $objItem.DefaultLocalCodec
- Write-Host " " 
+    Write-Host " Recording Device is currently set to:      :" $objItem.RecordingDeviceName
+    Write-Host " Playback Device is currently set to:       :" $objItem.PlaybackDeviceName
+    Write-Host " Device is installed here:                  :" $objItem.PSPath
+    Write-Host " Device Driver ID:                          :" $objItem.DeviceDriver
+    Write-Host " Recording Volume level:                    :" $objItem.RecordingVolume
+    Write-Host " Playback Volume level:                     :" $objItem.PlaybackVolume
+    Write-Host " Current Codec Setting:                     :" $objItem.DefaultLocalCodec
+    Write-Host " " 
 }
 foreach($objItem in $IPInfo) { 
- Write-Host "Adapter:" $objItem.Description 
- Write-Host " DNS Domain:" $objItem.DNSDomain
- Write-Host " IPv4 Address:" $objItem.IPAddress[0]
- Write-Host " IPv6 Address:" $objItem.IPAddress[1]
- Write-Host " " 
+    Write-Host "Adapter:" $objItem.Description 
+    Write-Host " DNS Domain:" $objItem.DNSDomain
+    Write-Host " IPv4 Address:" $objItem.IPAddress[0]
+    Write-Host " IPv6 Address:" $objItem.IPAddress[1]
+    Write-Host " " 
 }
 foreach($objItem in $SystemInfo) { 
- Write-Host "Domain    :" $objItem.Domain
- Write-Host "PC        :" $objItem.Manufacturer
- Write-Host "Model     :" $objItem.Model
- Write-Host " " 
+    Write-Host "Domain    :" $objItem.Domain
+    Write-Host "PC        :" $objItem.Manufacturer
+    Write-Host "Model     :" $objItem.Model
+    Write-Host " " 
 }
 foreach($objItem in $SystemInfo) { 
- Write-Host "Domain    :" $objItem.Domain
- Write-Host "PC        :" $objItem.Manufacturer
- Write-Host "Model     :" $objItem.Model
- Write-Host " " 
+    Write-Host "Domain    :" $objItem.Domain
+    Write-Host "PC        :" $objItem.Manufacturer
+    Write-Host "Model     :" $objItem.Model
+    Write-Host " " 
 }
+
 function GetUpdateInfo {
     Get-WmiObject -Class Win32_QuickFixEngineering
 }
 GetUpdateInfo Format-Table –AutoSize
 
-#####System Info and Windows Updates
-#Considerations
-#searchable by required info
-#add - memory info
-
-
-
 
 
 #####Device Manager and Power Management Settings
-
 
 Get-CimInstance Win32_OperatingSystem | Select-Object  Caption, InstallDate, ServicePackMajorVersion, OSArchitecture, BootDevice,  BuildNumber, CSName | FL
 
