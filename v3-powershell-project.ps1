@@ -33,23 +33,22 @@ Domain Controller (2)
 Server (3)
 
 edit
+
+convert to html
 #>
+
+#Hardcoded
+$array = '.NET*','Terminal*', 'bighand*','dragon*'
 
 Write-Host "# --------------------------------------"
 Write-Host "# Return list of installed company applications, including versions and build number"
 Write-Host "# --------------------------------------"
 function GetPrograms {
-
     param ($param)
     Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* |
     where {$_.DisplayName -like $param}
-
 }
-
-$array = '.NET*','Terminal*', 'bighand*','dragon*'
-
 foreach ($item in $array){
-
     GetPrograms -param $item | SELECT DisplayName, Comments | 
     Format-Table –AutoSize
 }
@@ -65,8 +64,6 @@ Write-Host "# --------------------------------------"
     $PCInfo = Get-WmiObject -Class Win32_ComputerSystem
    # $SystemInfo = Get-CimInstance Win32_OperatingSystem
     $SystemInfo = Get-WmiObject -Class Win32_OperatingSystem
-
-$Error.Clear()
 
 foreach($objItem in $DeviceInfo) { 
     Write-Host " Recording Device is currently set to:      :" $objItem.RecordingDeviceName
@@ -99,35 +96,26 @@ foreach($objItem in $PCInfo) {
 }
 
 
-if ($Error.Count -gt 0) { 
-    Write-Host "An error occured while trying to determine ProductType" 
-} 
-else { 
-    switch ($SystemInfo.ProductType)  
-    {  
-        1 {"Workstation"}  
-        2 {"Domain Controller"}  
-        3 {"Server"}  
-        default {"Not a known Product Type"} 
-    } }
+
 
 
 
 foreach($objItem in $SystemInfo) { 
     Write-Host "Machine Operating System         :" $objItem.Caption
     Write-Host "OSArchitecture                   :" $objItem.OSArchitecture
-    If ($SystemInfo.ProductType -eq 1)
-        {
-            Write-Host "This is a Local Workstation"
-        }
-    Elseif ($SystemInfo.ProductType -eq 2)
-        {
-            Write-Host "This is a Domain Controller"
-        }
-    Elseif ($SystemInfo.ProductType -eq 3)
-        {
-            Write-Host "This is a Server"
-        }
+    #Get-ProductInfo
+        if ($Error.Count -gt 0) { 
+            Write-Host "An error occured while trying to determine ProductType" 
+        } 
+        else { 
+            switch ($SystemInfo.ProductType)  
+            {  
+                1 {"Environment:         This is a Local Workstation"}  
+                2 {"Environment:         This is a Domain Controller"}  
+                3 {"Environment:         This is a Server"}  
+                default {"This is a not a known Product Type"} 
+            }
+         }
     Write-Host "Was Last Rebooted                :" $objItem.LastBootUpTime
     Write-Host "Current date/time on machine     :" $objItem.LocalDateTime
     Write-Host " " 
