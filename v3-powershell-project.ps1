@@ -97,7 +97,18 @@ foreach($objItem in $PCInfo) {
 foreach($objItem in $SystemInfo) { 
     Write-Host "Machine Operating System         :" $objItem.Caption
     Write-Host "OSArchitecture                   :" $objItem.OSArchitecture
-    Write-Host "WorkStation=1 Server=3           :" $objItem.ProductType
+    If ($SystemInfo.ProductType -eq 1)
+        {
+            Write-Host "This is a Local Workstation"
+        }
+    Elseif ($SystemInfo.ProductType -eq 2)
+        {
+            Write-Host "This is a Domain Controller"
+        }
+    Elseif ($SystemInfo.ProductType -eq 3)
+        {
+            Write-Host "This is a Server"
+        }
     Write-Host "Was Last Rebooted                :" $objItem.LastBootUpTime
     Write-Host "Current date/time on machine     :" $objItem.LocalDateTime
     Write-Host " " 
