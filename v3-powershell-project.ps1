@@ -63,7 +63,10 @@ Write-Host "# --------------------------------------"
     $IPInfo = Get-WmiObject Win32_NetworkAdapterConfiguration -Namespace "root\CIMV2" |
         where{$_.IPEnabled -eq "True"}
     $PCInfo = Get-WmiObject -Class Win32_ComputerSystem
-    $SystemInfo = Get-CimInstance Win32_OperatingSystem
+   # $SystemInfo = Get-CimInstance Win32_OperatingSystem
+    $SystemInfo = Get-WmiObject -Class Win32_OperatingSystem
+
+$Error.Clear()
 
 foreach($objItem in $DeviceInfo) { 
     Write-Host " Recording Device is currently set to:      :" $objItem.RecordingDeviceName
@@ -94,6 +97,22 @@ foreach($objItem in $PCInfo) {
     Write-Host "Model     :" $objItem.Model
     Write-Host " " 
 }
+
+
+if ($Error.Count -gt 0) { 
+    Write-Host "An error occured while trying to determine ProductType" 
+} 
+else { 
+    switch ($SystemInfo.ProductType)  
+    {  
+        1 {"Workstation"}  
+        2 {"Domain Controller"}  
+        3 {"Server"}  
+        default {"Not a known Product Type"} 
+    } }
+
+
+
 foreach($objItem in $SystemInfo) { 
     Write-Host "Machine Operating System         :" $objItem.Caption
     Write-Host "OSArchitecture                   :" $objItem.OSArchitecture
