@@ -2,8 +2,9 @@
 DONE-List of installed company applications, including versions and build number
 DONE-Current connected devices, including model and make
 DONE-System information, including OS version, machine build
-
 DONE-Latest windows updates and date installed
+
+
 
 Power management settings for windows
 USB root hub power settings for USB power devices
@@ -43,16 +44,15 @@ $array = '.NET*','Terminal*', 'bighand*','dragon*'
 Write-Host "# --------------------------------------"
 Write-Host "# Return list of installed company applications, including versions and build number"
 Write-Host "# --------------------------------------"
-function GetPrograms {
+function Get-Programs {
     param ($param)
     Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* |
     where {$_.DisplayName -like $param}
 }
 foreach ($item in $array){
-    GetPrograms -param $item | SELECT DisplayName, Comments | 
+    Get-Programs -param $item | SELECT DisplayName, Comments | 
     Format-Table –AutoSize
 }
-
 
 Write-Host "# --------------------------------------"
 Write-Host "# Retrieve current device information"
@@ -90,12 +90,6 @@ foreach($objItem in $PCInfo) {
     Write-Host "PC from                                     :" $objItem.Manufacturer
     Write-Host " " 
 }
-
-
-
-
-
-
 foreach($objItem in $SystemInfo) { 
     Write-Host "Machine Operating System         :" $objItem.Caption
     Write-Host "OSArchitecture                   :" $objItem.OSArchitecture
@@ -120,7 +114,7 @@ foreach($objItem in $SystemInfo) {
 function GetUpdateInfo {
     Get-WmiObject -Class Win32_QuickFixEngineering
 }
-GetUpdateInfo Format-Table –AutoSize
+GetUpdateInfo | FT –AutoSize
 
 
 
@@ -139,7 +133,9 @@ Get-Device -ControlOptions DIGCF_ALLCLASSES | Sort-Object -Property Name | Where
 
 ##https://foxdeploy.com/2015/07/31/using-powershell-to-find-drivers-for-device-manager/
 ###https://deploymentresearch.com/Research/Post/306/Back-to-basics-Finding-Lenovo-drivers-and-certify-hardware-control-freak-style
-Get-WmiObject Win32_PNPEntity | Where-Object{$_.PNPDeviceID -ne 0} | Select Name, DeviceID
+Get-WmiObject Win32_PNPEntity | Where-Object{$_.PNPDeviceID -ne 0} | FT –AutoSize | Out-file C:\Powershell\output.txt
+
+Select Name, DeviceID
 
 
 # -------------------------------------- 
@@ -158,3 +154,56 @@ ForEach ($ds in $DataSourceList) {
    Write-Host "Failed to connect to $ds" 
   } 
 } 
+
+
+
+
+$colFiles = Get-ChildItem C:\Windows -include *.dll -recurse
+
+foreach ($objFile in $colFiles)
+    {
+        $i++
+        $intSize = $intSize + $objFile.Length
+        Write-Progress -activity "Adding File Sizes" -status "Percent added: " -PercentComplete (($i / $colFiles.length)  * 100)
+
+    }
+
+$intSize = "{0:N0}" -f $intSize
+
+Write-Host "Total size of .DLL files: $intSize bytes."
+
+
+
+
+
+
+Write-Host "# --------------------------------------"
+Write-Host "# Retrieve last 100 Application Events"
+Write-Host "# --------------------------------------"
+PowerShell -Command "Get-EventLog -LogName Application"
+$bighandevents = get-eventlog -logname Application -newest 10  | Format-Table -Wrap -AutoSize
+
+Write-Host "# --------------------------------------"
+Write-Host "# Retrieve last 100 BigHand Events"
+Write-Host "# --------------------------------------"
+PowerShell -Command "Get-EventLog -LogName BigHand"
+$bighandevents = get-eventlog -logname BigHand -newest 100  | Format-Table -Wrap -AutoSize
+
+Write-Host "# --------------------------------------"
+Write-Host "# Retrieve last 100 Security Events"
+Write-Host "# --------------------------------------"
+PowerShell -Command "Get-EventLog -LogName Security"
+$bighandevents = get-eventlog -logname Security -newest 100  | Format-Table -Wrap -AutoSize
+
+
+
+$events | select-string -pattern 'Bighand'
+
+
+$bighandevents | -inputobject {$_.Source} -pattern "BigHand"
+
+
+#$events | select-string -inputobject {$_} | Sort-Object LastWriteTime -Descending
+
+
+
