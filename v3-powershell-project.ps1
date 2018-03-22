@@ -176,6 +176,9 @@ Write-Host "Total size of .DLL files: $intSize bytes."
 
 
 
+$Events = Get-Eventlog -LogName system -Newest 1000
+PS C:\> $Events | Group-Object -Property source -noelement | Sort-Object -Property count -Descending
+
 
 Write-Host "# --------------------------------------"
 Write-Host "# Retrieve last 100 Application Events"
@@ -205,5 +208,24 @@ $bighandevents | -inputobject {$_.Source} -pattern "BigHand"
 
 #$events | select-string -inputobject {$_} | Sort-Object LastWriteTime -Descending
 
+
+
+
+#
+$Events = Get-Eventlog -LogName BigHand -Newest 1000
+$Events | Group-Object -Property source -noelement | Sort-Object -Property count -Descending
+
+#Get all events in an event log that have include a specific word in the message value
+Get-EventLog -LogName "Bighand" -Message "*Creating**"
+
+#Display the property values of an event in a list
+$A = Get-EventLog -Log System -Newest 1
+$A | Format-List -Property *
+
+
+#Get all errors in an event log that occurred during a specific time frame
+$May31 = Get-Date 10/01/2018
+$July1 = Get-Date 20/03/2018
+Get-EventLog -Log "Bighand" -EntryType Error -After $May31 -before $July1 | Format-Table -Wrap -AutoSize |  out-file C:\Powershell\event.txt
 
 
