@@ -1,7 +1,7 @@
 ﻿<#
 DONE-List of installed company applications, including versions and build number
-DONE-System information, including OS version, machine build
 DONE-Current connected devices, including model and make
+DONE-System information, including OS version, machine build
 
 DONE-Latest windows updates and date installed
 
@@ -62,36 +62,32 @@ Write-Host "# --------------------------------------"
     $IPInfo = Get-WmiObject Win32_NetworkAdapterConfiguration -Namespace "root\CIMV2" |
         where{$_.IPEnabled -eq "True"}
     $PCInfo = Get-WmiObject -Class Win32_ComputerSystem
-   # $SystemInfo = Get-CimInstance Win32_OperatingSystem
     $SystemInfo = Get-WmiObject -Class Win32_OperatingSystem
 
 foreach($objItem in $DeviceInfo) { 
-    Write-Host " Recording Device is currently set to:      :" $objItem.RecordingDeviceName
-    Write-Host " Playback Device is currently set to:       :" $objItem.PlaybackDeviceName
-    Write-Host " Device is installed here:                  :" $objItem.PSPath
-    Write-Host " Device Driver ID:                          :" $objItem.DeviceDriver
-    Write-Host " Recording Volume level:                    :" $objItem.RecordingVolume
-    Write-Host " Playback Volume level:                     :" $objItem.PlaybackVolume
-    Write-Host " Current Codec Setting:                     :" $objItem.DefaultLocalCodec
+    Write-Host " Recording Device is currently set to       :" $objItem.RecordingDeviceName
+    Write-Host " Playback Device is currently set to        :" $objItem.PlaybackDeviceName
+    Write-Host " Device is installed here                   :" $objItem.PSPath
+    Write-Host " Device Driver ID                           :" $objItem.DeviceDriver
+    Write-Host " Recording Volume level                     :" $objItem.RecordingVolume
+    Write-Host " Playback Volume level                      :" $objItem.PlaybackVolume
+    Write-Host " Current Codec Setting                      :" $objItem.DefaultLocalCodec
     Write-Host " " 
 }
 foreach($objItem in $IPInfo) { 
-    Write-Host "Adapter:" $objItem.Description 
-    Write-Host " DNS Domain:" $objItem.DNSDomain
-    Write-Host " IPv4 Address:" $objItem.IPAddress[0]
-    Write-Host " IPv6 Address:" $objItem.IPAddress[1]
+    Write-Host "Adapter                                     :" $objItem.Description 
+    Write-Host " DNS Domain                                 :" $objItem.DNSDomain
+    Write-Host " IPv4 Address                               :" $objItem.IPAddress[0]
+    Write-Host " IPv6 Address                               :" $objItem.IPAddress[1]
     Write-Host " " 
 }
 foreach($objItem in $SystemInfo) { 
-    Write-Host "Domain    :" $objItem.Domain
-    Write-Host "PC        :" $objItem.Manufacturer
-    Write-Host "Model     :" $objItem.Model
+    Write-Host "Machine Model                               :" $objItem.Model
     Write-Host " " 
 }
 foreach($objItem in $PCInfo) { 
-    Write-Host "Domain    :" $objItem.Domain
-    Write-Host "PC        :" $objItem.Manufacturer
-    Write-Host "Model     :" $objItem.Model
+    Write-Host "PC is Registered to Domain                  :" $objItem.Domain
+    Write-Host "PC from                                     :" $objItem.Manufacturer
     Write-Host " " 
 }
 
