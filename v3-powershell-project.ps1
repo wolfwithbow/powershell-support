@@ -51,7 +51,8 @@ function Get-Programs {
 }
 foreach ($item in $array){
     Get-Programs -param $item | SELECT DisplayName, Comments | 
-    Format-Table –AutoSize
+    Format-Table –AutoSize |
+    Out-File -Append C:\Powershell\new.txt
 }
 
 Write-Host "# --------------------------------------"
@@ -72,7 +73,7 @@ foreach($objItem in $DeviceInfo) {
     Write-Host " Recording Volume level                     :" $objItem.RecordingVolume
     Write-Host " Playback Volume level                      :" $objItem.PlaybackVolume
     Write-Host " Current Codec Setting                      :" $objItem.DefaultLocalCodec
-    Write-Host " " 
+    Write-Host " "
 }
 foreach($objItem in $IPInfo) { 
     Write-Host "Adapter                                     :" $objItem.Description 
@@ -108,14 +109,18 @@ foreach($objItem in $SystemInfo) {
          }
     Write-Host "Was Last Rebooted                :" $objItem.LastBootUpTime
     Write-Host "Current date/time on machine     :" $objItem.LocalDateTime
-    Write-Host " " 
+    Write-Host " "
 }
 
 function GetUpdateInfo {
     Get-WmiObject -Class Win32_QuickFixEngineering
 }
-GetUpdateInfo | FT –AutoSize
+GetUpdateInfo | FT –AutoSize | Out-File -Append C:\Powershell\new.txt
 
+    $DeviceInfo | Out-File -Append C:\Powershell\new.txt
+    $IPInfo | Out-File -Append C:\Powershell\new.txt
+    $PCInfo | Out-File -Append C:\Powershell\new.txt
+    $SystemInfo | Out-File -Append C:\Powershell\new.txt
 
 
 
@@ -200,18 +205,6 @@ $bighandevents = get-eventlog -logname Security -newest 100  | Format-Table -Wra
 
 
 
-$events | select-string -pattern 'Bighand'
-
-
-$bighandevents | -inputobject {$_.Source} -pattern "BigHand"
-
-
-#$events | select-string -inputobject {$_} | Sort-Object LastWriteTime -Descending
-
-
-
-
-#
 $Events = Get-Eventlog -LogName BigHand -Newest 1000
 $Events | Group-Object -Property source -noelement | Sort-Object -Property count -Descending
 
@@ -229,3 +222,28 @@ $July1 = Get-Date 20/03/2018
 Get-EventLog -Log "Bighand" -EntryType Error -After $May31 -before $July1 | Format-Table -Wrap -AutoSize |  out-file C:\Powershell\event.txt
 
 
+
+$destination = "c:\Powershell\event.txt"
+copy-item $destination
+# send email with the copied attachment
+
+$SMTPServer = "mail"
+$SMTPPort = "25"
+$Username = "powershellscript@bighand.com"
+$Password = "drtgbrd"
+$to = "emailn.com"
+$cc = "user2@domain.com"
+$subject = "Email Subject"
+$body = "Insert body text here"
+$attachment = $destination
+$message = New-Object System.Net.Mail.MailMessage
+$message.subject = $subject
+$message.body = $body
+$message.to.add($to)
+#$message.cc.add($cc)
+$message.from = $username
+$message.attachments.add($attachment)
+$smtp = New-Object System.Net.Mail.SmtpClient($SMTPServer, $SMTPPort);
+#$smtp.EnableSSL = $true
+$smtp.Credentials = New-Object System.Net.NetworkCredential($Username, $Password);
+$smtp.send($message) 
