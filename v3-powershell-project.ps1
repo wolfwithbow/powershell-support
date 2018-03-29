@@ -1,49 +1,36 @@
 ﻿<#
-DONE-List of installed company applications, including versions and build number
-DONE-Current connected devices, including model and make
-DONE-System information, including OS version, machine build
-DONE-Latest windows updates and date installed
+    --DONE
+    List of installed company applications, including versions and build number
+    Current connected devices, including model and make
+    System information, including OS version, machine build
+    Latest windows updates and date installed
+    
+    --cONSIDER
+    Power management settings for windows
+    USB root hub power settings for USB power devices
+    Confirm if the application is authenticated via single sign-on
+    FQDN of the host server the application it should be currently connecting to
+    Confirm if the machine can ping the application server
+    Test the machine's connection to the database server
+    Confirm that the time on the machine is correct
+    Confirm the application user cache setting
+    Check if the required ports on firewall have been enabled
+    Reformat and write results to html file
 
+    --List of sources
+    https://community.spiceworks.com/topic/621669-powershell-mail-script
 
-
-Power management settings for windows
-USB root hub power settings for USB power devices
-
-
-Confirm if the application is authenticated via single sign-on
-FQDN of the host server the application it should be currently connecting to
-Confirm if the machine can ping the application server
-Test the machine's connection to the database server
-
-Whilst I was re-writing this list a few more came up (oops) [10/03/2018]
-Confirm that the time on the machine is correct
-Confirm the application user cache setting
-Check if the required ports on firewall have been enabled
-
-
-#Out-File -filepath C:\Powershell\test.txt
-#FT - Format Table
-#FL - Format List
-
-
-
-TO DO
-create loop for ProductType:
-Work Station (1)
-Domain Controller (2)
-Server (3)
-
-edit
-
-convert to html
+    --Author
+    Bow Chung
 #>
 
-#Hardcoded
-$array = '.NET*','Terminal*', 'bighand*','dragon*'
 
+# Declare variables
+$array = '.NET*','Terminal*', 'bighand*','dragon*'
 Write-Host "# --------------------------------------"
-Write-Host "# Return list of installed company applications, including versions and build number"
+Write-Host "# Retrieving application version and builds"
 Write-Host "# --------------------------------------"
+#Call function
 function Get-Programs {
     param ($param)
     Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* |
@@ -56,8 +43,7 @@ foreach ($item in $array){
 }
 
 Write-Host "# --------------------------------------"
-Write-Host "# Retrieve current device information"
-Write-Host "# Local IP address information"
+Write-Host "# Retrieving devices and machine information"
 Write-Host "# --------------------------------------"
     $DeviceInfo = Get-ItemProperty -path HKCU:\SOFTWARE\BigHand\BHRecorder
     $IPInfo = Get-WmiObject Win32_NetworkAdapterConfiguration -Namespace "root\CIMV2" |
@@ -73,27 +59,25 @@ foreach($objItem in $DeviceInfo) {
     Write-Host " Recording Volume level                     :" $objItem.RecordingVolume
     Write-Host " Playback Volume level                      :" $objItem.PlaybackVolume
     Write-Host " Current Codec Setting                      :" $objItem.DefaultLocalCodec
-    Write-Host " "
 }
-foreach($objItem in $IPInfo) { 
-    Write-Host "Adapter                                     :" $objItem.Description 
-    Write-Host " DNS Domain                                 :" $objItem.DNSDomain
-    Write-Host " IPv4 Address                               :" $objItem.IPAddress[0]
-    Write-Host " IPv6 Address                               :" $objItem.IPAddress[1]
-    Write-Host " " 
+foreach($objItem in $SystemInfo) { 
+        if ($Error.Count -gt 0) { 
+            switch ($SystemInfo.Model)  
+            {  
+                default {"Machine Model Unknown"} 
+            }
+         }
 }
 foreach($objItem in $SystemInfo) { 
     Write-Host "Machine Model                               :" $objItem.Model
-    Write-Host " " 
 }
 foreach($objItem in $PCInfo) { 
     Write-Host "PC is Registered to Domain                  :" $objItem.Domain
     Write-Host "PC from                                     :" $objItem.Manufacturer
-    Write-Host " " 
 }
 foreach($objItem in $SystemInfo) { 
-    Write-Host "Machine Operating System         :" $objItem.Caption
-    Write-Host "OSArchitecture                   :" $objItem.OSArchitecture
+    Write-Host "Machine Operating System                    :" $objItem.Caption
+    Write-Host "OSArchitecture                              :" $objItem.OSArchitecture
     #Get-ProductInfo
         if ($Error.Count -gt 0) { 
             Write-Host "An error occured while trying to determine ProductType" 
@@ -101,15 +85,14 @@ foreach($objItem in $SystemInfo) {
         else { 
             switch ($SystemInfo.ProductType)  
             {  
-                1 {"Environment:         This is a Local Workstation"}  
-                2 {"Environment:         This is a Domain Controller"}  
-                3 {"Environment:         This is a Server"}  
+                1 {"Environment                  :This is a Local Workstation"}  
+                2 {"Environment                  :This is a Domain Controller"}  
+                3 {"Environment                  :This is a Server"}  
                 default {"This is a not a known Product Type"} 
             }
          }
-    Write-Host "Was Last Rebooted                :" $objItem.LastBootUpTime
-    Write-Host "Current date/time on machine     :" $objItem.LocalDateTime
-    Write-Host " "
+    Write-Host "Was Last Rebooted                          :" $objItem.LastBootUpTime
+    Write-Host "Current date/time on machine               :" $objItem.LocalDateTime
 }
 
 function GetUpdateInfo {
@@ -117,10 +100,16 @@ function GetUpdateInfo {
 }
 GetUpdateInfo | FT –AutoSize | Out-File -Append C:\Powershell\new.txt
 
-    $DeviceInfo | Out-File -Append C:\Powershell\new.txt
-    $IPInfo | Out-File -Append C:\Powershell\new.txt
-    $PCInfo | Out-File -Append C:\Powershell\new.txt
-    $SystemInfo | Out-File -Append C:\Powershell\new.txt
+   # $DeviceInfo | Out-File -Append C:\Powershell\new.txt
+   # $IPInfo | Out-File -Append C:\Powershell\new.txt
+   # $PCInfo | Out-File -Append C:\Powershell\new.txt
+   # $SystemInfo | Out-File -Append C:\Powershell\new.txt
+
+
+$DeviceInfo,$IPInfo,$PCInfo,$SystemInfo | out-file -filepath C:\Powershell\dump.txt -append -width 200
+
+
+
 
 
 
@@ -222,20 +211,21 @@ $July1 = Get-Date 20/03/2018
 Get-EventLog -Log "Bighand" -EntryType Error -After $May31 -before $July1 | Format-Table -Wrap -AutoSize |  out-file C:\Powershell\event.txt
 
 
-
+# Declare variable attachment
 $destination = "c:\Powershell\event.txt"
-copy-item $destination
+get-help copy-item $destination
 # send email with the copied attachment
-
 $SMTPServer = "mail"
 $SMTPPort = "25"
-$Username = "powershellscript@bighand.com"
-$Password = "drtgbrd"
-$to = "emailn.com"
+$Username = "fromemail@company.com"
+$Password = "xxxxx"
+
+$to = "toemail@company.com"
 $cc = "user2@domain.com"
 $subject = "Email Subject"
 $body = "Insert body text here"
 $attachment = $destination
+
 $message = New-Object System.Net.Mail.MailMessage
 $message.subject = $subject
 $message.body = $body
@@ -247,3 +237,4 @@ $smtp = New-Object System.Net.Mail.SmtpClient($SMTPServer, $SMTPPort);
 #$smtp.EnableSSL = $true
 $smtp.Credentials = New-Object System.Net.NetworkCredential($Username, $Password);
 $smtp.send($message) 
+
