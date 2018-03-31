@@ -1,13 +1,38 @@
 ﻿<#
-    Resource: http://tommymaynard.com/write-functions-not-scripts-part-iv-2018/
+=======
+    --DONE
+    List of installed company applications, including versions and build number
+    Current connected devices, including model and make
+    System information, including OS version, machine build
+    Latest windows updates and date installed
+    
+    --Consider
+    Power management settings for windows
+    USB root hub power settings for USB power devices
+    Confirm if the application is authenticated via single sign-on
+    FQDN of the host server the application it should be currently connecting to
+    Confirm if the machine can ping the application server
+    Test the machine's connection to the database server
+    Confirm that the time on the machine is correct
+    Confirm the application user cache setting
+    Check if the required ports on firewall have been enabled
+    Reformat and write results to html file
+
+    --List of sources
+    http://tommymaynard.com/write-functions-not-scripts-part-iv-2018/
+    https://community.spiceworks.com/topic/621669-powershell-mail-script
+
+    --Author
+    @bow_chung
 #>
 
-#Hardcoded
-$array = '.NET*','Terminal*', 'bighand*','dragon*'
 
+# Declare variables
+$array = '.NET*','Terminal*', 'bighand*','dragon*'
 Write-Host "# --------------------------------------"
-Write-Host "# Return list of installed company applications, including versions and build number"
+Write-Host "# Retrieving application version and builds"
 Write-Host "# --------------------------------------"
+# Call function
 function Get-Programs {
     param ($param)
     Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* |
@@ -15,16 +40,14 @@ function Get-Programs {
 }
 foreach ($item in $array){
     Get-Programs -param $item | SELECT DisplayName, Comments | 
-    Format-Table –AutoSize
+    Format-Table –AutoSize |
 }
 
 Write-Host "# --------------------------------------"
-Write-Host "# Retrieve current device information"
-Write-Host "# Local IP address information"
+Write-Host "# Retrieving devices and machine information"
 Write-Host "# --------------------------------------"
     $DeviceInfo = Get-ItemProperty -path HKCU:\SOFTWARE\BigHand\BHRecorder
-    $IPInfo = Get-WmiObject Win32_NetworkAdapterConfiguration -Namespace "root\CIMV2" |
-        where{$_.IPEnabled -eq "True"}
+    $IPInfo = Get-WmiObject Win32_NetworkAdapterConfiguration -Namespace "root\CIMV2" | where{$_.IPEnabled -eq "True"}
     $PCInfo = Get-WmiObject -Class Win32_ComputerSystem
     $SystemInfo = Get-WmiObject -Class Win32_OperatingSystem
 
@@ -36,27 +59,25 @@ foreach($objItem in $DeviceInfo) {
     Write-Host " Recording Volume level                     :" $objItem.RecordingVolume
     Write-Host " Playback Volume level                      :" $objItem.PlaybackVolume
     Write-Host " Current Codec Setting                      :" $objItem.DefaultLocalCodec
-    Write-Host " " 
 }
-foreach($objItem in $IPInfo) { 
-    Write-Host "Adapter                                     :" $objItem.Description 
-    Write-Host " DNS Domain                                 :" $objItem.DNSDomain
-    Write-Host " IPv4 Address                               :" $objItem.IPAddress[0]
-    Write-Host " IPv6 Address                               :" $objItem.IPAddress[1]
-    Write-Host " " 
+foreach($objItem in $SystemInfo) { 
+        if ($Error.Count -gt 0) { 
+            switch ($SystemInfo.Model)  
+            {  
+                default {"Machine Model Unknown"} 
+            }
+         }
 }
 foreach($objItem in $SystemInfo) { 
     Write-Host "Machine Model                               :" $objItem.Model
-    Write-Host " " 
 }
 foreach($objItem in $PCInfo) { 
     Write-Host "PC is Registered to Domain                  :" $objItem.Domain
     Write-Host "PC from                                     :" $objItem.Manufacturer
-    Write-Host " " 
 }
 foreach($objItem in $SystemInfo) { 
-    Write-Host "Machine Operating System         :" $objItem.Caption
-    Write-Host "OSArchitecture                   :" $objItem.OSArchitecture
+    Write-Host "Machine Operating System                    :" $objItem.Caption
+    Write-Host "OSArchitecture                              :" $objItem.OSArchitecture
     #Get-ProductInfo
         if ($Error.Count -gt 0) { 
             Write-Host "An error occured while trying to determine ProductType" 
@@ -64,21 +85,25 @@ foreach($objItem in $SystemInfo) {
         else { 
             switch ($SystemInfo.ProductType)  
             {  
-                1 {"Environment:         This is a Local Workstation"}  
-                2 {"Environment:         This is a Domain Controller"}  
-                3 {"Environment:         This is a Server"}  
+                1 {"Environment                  :This is a Local Workstation"}  
+                2 {"Environment                  :This is a Domain Controller"}  
+                3 {"Environment                  :This is a Server"}  
                 default {"This is a not a known Product Type"} 
             }
          }
-    Write-Host "Was Last Rebooted                :" $objItem.LastBootUpTime
-    Write-Host "Current date/time on machine     :" $objItem.LocalDateTime
-    Write-Host " " 
+    Write-Host "Was Last Rebooted                          :" $objItem.LastBootUpTime
+    Write-Host "Current date/time on machine               :" $objItem.LocalDateTime
 }
 
 function GetUpdateInfo {
     Get-WmiObject -Class Win32_QuickFixEngineering
 }
 GetUpdateInfo | FT –AutoSize
+
+
+$DeviceInfo,$IPInfo,$PCInfo,$SystemInfo | out-file -filepath C:\Powershell\dump.txt -append -width 200
+
+
 
 
 
@@ -164,18 +189,6 @@ $bighandevents = get-eventlog -logname Security -newest 100  | Format-Table -Wra
 
 
 
-$events | select-string -pattern 'Bighand'
-
-
-$bighandevents | -inputobject {$_.Source} -pattern "BigHand"
-
-
-#$events | select-string -inputobject {$_} | Sort-Object LastWriteTime -Descending
-
-
-
-
-#
 $Events = Get-Eventlog -LogName BigHand -Newest 1000
 $Events | Group-Object -Property source -noelement | Sort-Object -Property count -Descending
 
@@ -192,4 +205,31 @@ $May31 = Get-Date 10/01/2018
 $July1 = Get-Date 20/03/2018
 Get-EventLog -Log "Bighand" -EntryType Error -After $May31 -before $July1 | Format-Table -Wrap -AutoSize |  out-file C:\Powershell\event.txt
 
+
+# Declare variable attachment
+$destination = "c:\Powershell\event.txt"
+get-help copy-item $destination
+# send email with the copied attachment
+$SMTPServer = "mail"
+$SMTPPort = "25"
+$Username = "fromemail@company.com"
+$Password = "xxxxx"
+
+$to = "toemail@company.com"
+$cc = "user2@domain.com"
+$subject = "Email Subject"
+$body = "Insert body text here"
+$attachment = $destination
+
+$message = New-Object System.Net.Mail.MailMessage
+$message.subject = $subject
+$message.body = $body
+$message.to.add($to)
+#$message.cc.add($cc)
+$message.from = $username
+$message.attachments.add($attachment)
+$smtp = New-Object System.Net.Mail.SmtpClient($SMTPServer, $SMTPPort);
+#$smtp.EnableSSL = $true
+$smtp.Credentials = New-Object System.Net.NetworkCredential($Username, $Password);
+$smtp.send($message) 
 
