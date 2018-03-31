@@ -1,41 +1,5 @@
 ﻿<#
-DONE-List of installed company applications, including versions and build number
-DONE-Current connected devices, including model and make
-DONE-System information, including OS version, machine build
-DONE-Latest windows updates and date installed
-
-
-
-Power management settings for windows
-USB root hub power settings for USB power devices
-
-
-Confirm if the application is authenticated via single sign-on
-FQDN of the host server the application it should be currently connecting to
-Confirm if the machine can ping the application server
-Test the machine's connection to the database server
-
-Whilst I was re-writing this list a few more came up (oops) [10/03/2018]
-Confirm that the time on the machine is correct
-Confirm the application user cache setting
-Check if the required ports on firewall have been enabled
-
-
-#Out-File -filepath C:\Powershell\test.txt
-#FT - Format Table
-#FL - Format List
-
-
-
-TO DO
-create loop for ProductType:
-Work Station (1)
-Domain Controller (2)
-Server (3)
-
-edit
-
-convert to html
+    Resource: http://tommymaynard.com/write-functions-not-scripts-part-iv-2018/
 #>
 
 #Hardcoded
